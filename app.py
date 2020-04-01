@@ -12,51 +12,58 @@ import pandas as pd
 import numpy as np
 
 
-data = utils.data_handler()
+data_map = utils.data_handler()
+
 os.remove("kaggle_income.csv.zip")
 
-states = data['State_Name'].unique()
-counties = data['County'].unique()
-incomes = data['Mean'].unique()
+states = data_map['State_Name'].unique()
+counties = data_map['County'].unique()
+incomes = data_map['Mean'].unique()
+
 
 bins = [
-    "0-25.000",
-    "25.000-50.000",
-    "50.000-100.000",
-    "100.000-150.000",
-    "150.000-200000",
-    "+200000"
+    0,
+    25000,
+    50000,
+    100000,
+    150000,
+    200000,
+    250000,
+    3000000        
 ]
 
 scale = [
-    "#f2fffb",
-    "#6df0c8",
-    "#69e7c0",
-    "#31c194",
-    "#1e906d",
-    "#10523e",
+    "#00f2a8",
+    "#00de9a",
+    "#00cb8c",
+    "#007c56",
+    "#00553b",
+    "#00412d",
+    "#001a12",
+    "#000705",
 ]
 
 
-
-def generate_table(dataframe, max_rows=10):
-    return html.Table(
-        # Header
-        [html.Tr([html.Th(col) for col in dataframe.columns])] +
-
-        # Body
-        [html.Tr(
-            [html.Td(row[col]) for col in row.index.values]
-        ) for index, row in dataframe.head(max_rows).iterrows()]
-    )
-
+#
+#def generate_table(dataframe, max_rows=10):
+#    return html.Table(
+#        # Header
+#        [html.Tr([html.Th(col) for col in dataframe.columns])] +
+#
+#        # Body
+#        [html.Tr(
+#            [html.Td(row[col]) for col in row.index.values]
+#        ) for index, row in dataframe.head(max_rows).iterrows()]
+#    )
+#
 
 #load the app with the Bootstrap css theme
 #external_stylesheets = [dbc.themes.BOOTSTRAP]
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
     
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)  
-app.title = 'My First Dash App'
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets) 
+ 
+app.title = 'IncomeMapping in the USA'
 
 colors = {
     'background': 'lightgray',
@@ -83,10 +90,6 @@ app.layout = html.Div(
             id="header",
             children=[
                 html.H4(children="Mean income in the USA"),
-                html.P(
-                    id="description",
-                    children="Test description",
-                ),
             ],
         ),
         html.Div(
@@ -100,16 +103,16 @@ app.layout = html.Div(
                             children=[
                                 html.P(
                                     id="slider-text",
-                                    children="Drag the slider to change the year:",
+                                    children="Drag the slider to change the maximum mean income:",
                                 ),
                                 dcc.Slider(
-                                    id="years-slider",
+                                    id="income_slider",
                                     marks={
-                                        str(state): {
-                                            "label": str(state),
+                                        bin_: {
+                                            "label": str(bin_),
                                             "style": {"color": "#7fafdf"},
                                         }
-                                        for state in states
+                                        for bin_ in bins
                                     },
                                 ),
                             ],
@@ -118,20 +121,16 @@ app.layout = html.Div(
                             id="heatmap-container",
                             children=[
                                 html.P(
-                                    "Heatmap of income by city \
-                                    {0}".format(
-                                        min(incomes)
-                                    ),
-                                    id="heatmap-title",
-                                ),
+                                    "Heatmap of income by city"
+                                    ),        
                                 dcc.Graph(
                                     id="county-choropleth",
                                     figure=dict(
                                         data=[
                                             dict(
-                                                lat=data["Lat"],
-                                                lon=data["Lon"],
-                                                text=[data['City'],data["Mean"]],
+                                                lat=data_map["Lat"],
+                                                lon=data_map["Lon"],
+                                                text=data_map["Mean"],
                                                 type="scattermapbox",
                                             )
                                         ],
@@ -154,57 +153,76 @@ app.layout = html.Div(
                         ),
                     ],
                 ),
-                html.Div(
-                    id="graph-container",
-                    children=[
-                        html.P(id="chart-selector", children="Select chart:"),
-                        dcc.Dropdown(
-                            options=[
-                                {
-                                    "label": "Box plot of mean income by State",
-                                    "value": "boxplot",
-                                },
-                                {
-                                    "label": "Bar plot of mean income by State",
-                                    "value": "barplot",
-                                }
-                            ],
-                            value="barplot",
-                            id="chart-dropdown",
-                        ),
-                        dcc.Graph(
-                            id="selected-data",
-                            figure=dict(
-                                data=[dict(x=0, y=0)],
-                                layout=dict(
-                                    paper_bgcolor="#F4F4F8",
-                                    plot_bgcolor="#F4F4F8",
-                                    autofill=True,
-                                    margin=dict(t=75, r=50, b=100, l=50),
-                                ),
-                            ),
-                        ),
-                    ],
-                ),
+# =============================================================================
+#                 html.Div(
+#                     id="graph-container",
+#                     children=[
+#                         html.P(id="chart-selector", children="Select chart:"),
+#                         dcc.Dropdown(
+#                             options=[
+#                                 {
+#                                     "label": "Box plot of mean income by State",
+#                                     "value": "boxplot",
+#                                 },
+#                                 {
+#                                     "label": "Bar plot of mean income by State",
+#                                     "value": "barplot",
+#                                 }
+#                             ],
+#                             value="barplot",
+#                             id="chart-dropdown",
+#                         ),
+#                         dcc.Graph(
+#                             id="selected-data",
+#                             figure=dict(
+#                                 data=[dict(x=0, y=0)],
+#                                 layout=dict(
+#                                     paper_bgcolor="#F4F4F8",
+#                                     plot_bgcolor="#F4F4F8",
+#                                     autofill=True,
+#                                     margin=dict(t=75, r=50, b=100, l=50),
+#                                 ),
+#                             ),
+#                         ),
+#                     ],
+#                 ),
+# =============================================================================
             ],
         ),
     ],
 )
+                        
+#def filter_dataframe(income_slider):
+#    print(income_slider)
+#    dff= data_map.loc[data_map['Mean'] <= income_slider[1]]
+#    return dff
+# 
+#@app.callback(
+#     Output('county-choropleth','data'),
+#     [Input('income_slider','value')]
+#     )
+#def update_dataframe(income_slider):
+#     data_map=filter_dataframe(income_slider)
+#     return data_map                        
+
 
 
 @app.callback(
     Output("county-choropleth", "figure"),
-    [Input("years-slider", "value")],
+    [Input("income_slider", "value")],
     [State("county-choropleth", "figure")],
 )
-def display_map(year, figure):
+def display_map(income, figure):
     cm = dict(zip(bins, scale))
 
     data = [
         dict(
-            lat=data["Lat"],
-            lon=data["Lon"],
-            text=[data['City'],data["Mean"] + '$'],
+            lat=data_map["Lat"],
+            lon=data_map["Lon"],
+            text= dict(
+                    data_map['City'],
+                    data_map['Mean']
+                    ),
             type="scattermapbox",
             hoverinfo="text",
             marker=dict(size=5, color="white", opacity=0),
@@ -263,18 +281,18 @@ def display_map(year, figure):
         dragmode="lasso",
     )
 
-    base_url = "https://raw.githubusercontent.com/jackparmer/mapbox-counties/master/"
-    for bin in bins:
-        geo_layer = dict(
-            sourcetype="geojson",
-            source=base_url + str(year) + "/" + bin + ".geojson",
-            type="fill",
-            color=cm[bin],
-            opacity=DEFAULT_OPACITY,
-            # CHANGE THIS
-            fill=dict(outlinecolor="#afafaf"),
-        )
-        layout["mapbox"]["layers"].append(geo_layer)
+#    base_url = "https://raw.githubusercontent.com/jackparmer/mapbox-counties/master/"
+#    for bin in bins:
+#        geo_layer = dict(
+#            sourcetype="geojson",
+#            source=base_url + str(income) + "/" + bin + ".geojson",
+#            type="fill",
+#            color=cm[bin],
+#            opacity=DEFAULT_OPACITY,
+#            # CHANGE THIS
+#            fill=dict(outlinecolor="#afafaf"),
+#        )
+#        layout["mapbox"]["layers"].append(geo_layer)
 
     fig = dict(data=data, layout=layout)
     return fig
@@ -409,7 +427,7 @@ def display_map(year, figure):
 #        ] = "Age-adjusted death rate per county per year <br>(only 1st 500 shown)"
 #
 #    return fig
-#
+
 
 
 if __name__ == "__main__":
