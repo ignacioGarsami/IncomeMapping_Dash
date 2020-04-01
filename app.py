@@ -10,6 +10,7 @@ from dash.dependencies import Input, Output, State
 import json
 import pandas as pd
 import numpy as np
+import statistics
 
 
 
@@ -136,7 +137,7 @@ app.layout = html.Div(
                                                 hovertext = [["State: {} <br>County: {} <br>City: {} <br>Mean income: {}".format(i,j,v,w)]
                                                     for i,j,v,w in zip(data_map['State_Name'], data_map['County'], data_map['City'], data_map['Mean'])],
                                                 hoverinfo="text",
-                                                marker=dict(size= 5, color= data_map['Scale'], opacity=10),
+                                                marker=dict(size= 6, color= data_map['Scale'], opacity=7),
                                                 type="scattermapbox",
                                             )
                                         ],
@@ -167,12 +168,16 @@ app.layout = html.Div(
                          dcc.Dropdown(
                              options=[
                                  {
-                                     "label": "Box plot of mean income by State",
-                                     "value": "boxplot",
+                                     "label": "Income mean by city in the selected State (Aggregated by ZIP Codes)",
+                                     "value": "barplot",
                                  },
                                  {
-                                     "label": "Bar plot of mean income by State",
-                                     "value": "barplot",
+                                     "label": "Income std deviation by city in the selected State (Aggregated by ZIP Codes)",
+                                     "value": "barplot_std",
+                                 },
+                                {
+                                     "label": "Income median by city in the selected State (Aggregated by ZIP Codes)",
+                                     "value": "barplot_med",
                                  }
                              ],
                              value="barplot",
@@ -221,7 +226,7 @@ def display_map(value, figure):
                                 for i,j,v,w in zip(dff['State_Name'], dff['County'], dff['City'], dff['Mean'])],
             type="scattermapbox",
             hoverinfo="text",
-            marker=dict(size=5, color=dff['Scale'], opacity=10),
+            marker=dict(size=6, color=dff['Scale'], opacity=7),
         )
     ]
 
@@ -296,7 +301,17 @@ def display_selected_data(chart_dropdown, state):
 
     title = "Bar plot of mean income per county in selected state"
     
-    fig = go.Figure([go.Bar(x=dff['County'], y=['Mean'])])
+    if chart_dropdown == 'barplot':
+    
+        fig = go.Figure([go.Bar(x=dff['City'], y=dff['Mean'])])
+    
+    elif chart_dropdown == 'barplot_std':
+        
+        fig = go.Figure([go.Bar(x=dff['City'], y=dff['Stdev'])])
+    
+    else:
+        
+        fig = go.Figure([go.Bar(x=dff['City'], y=dff['Median'])])
 
     fig_layout = fig["layout"]
     fig_data = fig["data"]
