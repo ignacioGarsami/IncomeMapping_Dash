@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 
 
+
 data_map = utils.data_handler()
 
 os.remove("kaggle_income.csv.zip")
@@ -28,23 +29,29 @@ bins = [
     100000,
     150000,
     200000,
-    250000,
-    3000000        
+    250000,       
 ]
 
+data_map['Scale'] = "#ff0000"
+
+data_map.loc[data_map['Mean'] > 25000, 'Scale'] = "#00de9a"
+data_map.loc[data_map['Mean'] > 50000, 'Scale'] = "#00cb8c"
+data_map.loc[data_map['Mean'] > 100000, 'Scale'] = "#007c56"
+data_map.loc[data_map['Mean'] > 150000, 'Scale'] = "#00553b"
+data_map.loc[data_map['Mean'] > 200000, 'Scale'] = "#00412d"
+data_map.loc[data_map['Mean'] > 250000, 'Scale'] = "#001a12"
+
+
 scale = [
-    "#00f2a8",
+    "#ff0000",
     "#00de9a",
     "#00cb8c",
     "#007c56",
     "#00553b",
     "#00412d",
     "#001a12",
-    "#000705",
 ]
 
-
-#
 #def generate_table(dataframe, max_rows=10):
 #    return html.Table(
 #        # Header
@@ -88,6 +95,7 @@ app.layout = html.Div(
     children=[
         html.Div(
             id="header",
+            style={'textAlign': 'center'},
             children=[
                 html.H4(children="Mean income in the USA"),
             ],
@@ -101,9 +109,9 @@ app.layout = html.Div(
                         html.Div(
                             id="slider-container",
                             children=[
-                                html.P(
+                                html.H5(
                                     id="slider-text",
-                                    children="Drag the slider to change the maximum mean income:",
+                                    children="Select state to visualize:",
                                 ),
                                 dcc.Dropdown(
                                     id="state-select",
@@ -113,8 +121,9 @@ app.layout = html.Div(
                         ),
                         html.Div(
                             id="heatmap-container",
+                            style={'textAlign': 'center'},
                             children=[
-                                html.P(
+                                html.H5(
                                     "Heatmap of income by city"
                                     ),        
                                 dcc.Graph(
@@ -123,8 +132,11 @@ app.layout = html.Div(
                                         data=[
                                             dict(
                                                 lat=data_map["Lat"],
-                                                lon=data_map["Lon"],
-                                                text=data_map["Mean"],
+                                                lon=data_map["Lon"],    
+                                                hovertext = [["State: {} <br>County: {} <br>City: {} <br>Mean income: {}".format(i,j,v,w)]
+                                                    for i,j,v,w in zip(data_map['State_Name'], data_map['County'], data_map['City'], data_map['Mean'])],
+                                                hoverinfo="text",
+                                                marker=dict(size= 5, color= data_map['Scale'], opacity=10),
                                                 type="scattermapbox",
                                             )
                                         ],
@@ -151,7 +163,7 @@ app.layout = html.Div(
                  html.Div(
                      id="graph-container",
                      children=[
-                         html.P(id="chart-selector", children="Select chart:"),
+                         html.H5(id="chart-selector", style={'textAlign': 'center'}, children="Select chart:"),
                          dcc.Dropdown(
                              options=[
                                  {
@@ -196,7 +208,10 @@ app.layout = html.Div(
 )
 def display_map(value, figure):
     cm = dict(zip(bins, scale))
-    dff = data_map[data_map["State_Name"] == value]
+    if value is None:
+        dff = data_map
+    else:
+        dff = data_map[data_map["State_Name"] == value]
     
     data = [
         dict(
@@ -206,7 +221,7 @@ def display_map(value, figure):
                                 for i,j,v,w in zip(dff['State_Name'], dff['County'], dff['City'], dff['Mean'])],
             type="scattermapbox",
             hoverinfo="text",
-            marker=dict(size=5, color=scale, opacity=5),
+            marker=dict(size=5, color=dff['Scale'], opacity=10),
         )
     ]
 
