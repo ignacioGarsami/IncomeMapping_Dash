@@ -78,8 +78,8 @@ markdown_text = '''
 '''
 DEFAULT_OPACITY = 0.8
 
-mapbox_access_token = "pk.eyJ1IjoicGxvdGx5bWFwYm94IiwiYSI6ImNqdnBvNDMyaTAxYzkzeW5ubWdpZ2VjbmMifQ.TXcBE-xg9BFdV2ocecc_7g"
-mapbox_style = "mapbox://styles/plotlymapbox/cjvprkf3t1kns1cqjxuxmwixz"
+mapbox_access_token = "pk.eyJ1IjoiaWduYWNpb2dhcmMiLCJhIjoiY2s4aDdqNWVvMDF5aTNncG40bTEyMmwxdSJ9.khtjUesTo8hGuFb3x-1n9w"
+mapbox_style = "mapbox://styles/ignaciogarc/ck8h7mfze13fi1ioi6zw69s5b"
 
 # App layout
 
@@ -105,15 +105,9 @@ app.layout = html.Div(
                                     id="slider-text",
                                     children="Drag the slider to change the maximum mean income:",
                                 ),
-                                dcc.Slider(
-                                    id="income_slider",
-                                    marks={
-                                        bin_: {
-                                            "label": str(bin_),
-                                            "style": {"color": "#7fafdf"},
-                                        }
-                                        for bin_ in bins
-                                    },
+                                dcc.Dropdown(
+                                    id="state-select",
+                                    options=[{"label": i, "value": i} for i in states],
                                 ),
                             ],
                         ),
@@ -192,24 +186,10 @@ app.layout = html.Div(
     ],
 )
                         
-#def filter_dataframe(income_slider):
-#    print(income_slider)
-#    dff= data_map.loc[data_map['Mean'] <= income_slider[1]]
-#    return dff
-# 
-#@app.callback(
-#     Output('county-choropleth','data'),
-#     [Input('income_slider','value')]
-#     )
-#def update_dataframe(income_slider):
-#     data_map=filter_dataframe(income_slider)
-#     return data_map                        
-
-
 
 @app.callback(
     Output("county-choropleth", "figure"),
-    [Input("income_slider", "value")],
+    [Input("state-select", "value")],
     [State("county-choropleth", "figure")],
 )
 def display_map(income, figure):
@@ -219,10 +199,8 @@ def display_map(income, figure):
         dict(
             lat=data_map["Lat"],
             lon=data_map["Lon"],
-            text= dict(
-                    data_map['City'],
-                    data_map['Mean']
-                    ),
+            hovertext = [["State: {} <br>County: {} <br>City: {} <br>Mean income: {}".format(i,j,v,w)]
+                                for i,j,v,w in zip(data_map['State_Name'], data_map['County'], data_map['City'], data_map['Mean'])],
             type="scattermapbox",
             hoverinfo="text",
             marker=dict(size=5, color="white", opacity=0),
