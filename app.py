@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output, State
 import json
 import pandas as pd
 import numpy as np
-import statistics
+
 
 
 
@@ -67,16 +67,16 @@ scale = [
 
 #load the app with the Bootstrap css theme
 #external_stylesheets = [dbc.themes.BOOTSTRAP]
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = [dbc.themes.LUX]
     
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets) 
  
 app.title = 'IncomeMapping in the USA'
 
-colors = {
-    'background': 'lightgray',
-    'text': '#7FDBFF'
-}
+#colors = {
+#    'background': 'lightgray',
+#    'text': '#7FDBFF'
+#}
 
 markdown_text = '''
 #### Some references
@@ -101,105 +101,115 @@ app.layout = html.Div(
                 html.H4(children="Mean income in the USA"),
             ],
         ),
-        html.Div(
-            id="app-container",
-            children=[
-                html.Div(
-                    id="left-column",
+        dcc.Tabs([
+                dcc.Tab(label = 'Data visualization', children = [      
+                  html.Div(
+                    id="app-container",
                     children=[
                         html.Div(
-                            id="slider-container",
+                            id="left-column",
                             children=[
-                                html.H5(
-                                    id="slider-text",
-                                    children="Select state to visualize:",
-                                ),
-                                dcc.Dropdown(
-                                    id="state-select",
-                                    options=[{"label": i, "value": i} for i in states],
-                                ),
-                            ],
-                        ),
-                        html.Div(
-                            id="heatmap-container",
-                            style={'textAlign': 'center'},
-                            children=[
-                                html.H5(
-                                    "Heatmap of income by city"
-                                    ),        
-                                dcc.Graph(
-                                    id="county-choropleth",
-                                    figure=dict(
-                                        data=[
-                                            dict(
-                                                lat=data_map["Lat"],
-                                                lon=data_map["Lon"],    
-                                                hovertext = [["State: {} <br>County: {} <br>City: {} <br>Mean income: {}".format(i,j,v,w)]
-                                                    for i,j,v,w in zip(data_map['State_Name'], data_map['County'], data_map['City'], data_map['Mean'])],
-                                                hoverinfo="text",
-                                                marker=dict(size= 6, color= data_map['Scale'], opacity=7),
-                                                type="scattermapbox",
-                                            )
-                                        ],
-                                        layout=dict(
-                                            mapbox=dict(
-                                                layers=[],
-                                                accesstoken=mapbox_access_token,
-                                                style=mapbox_style,
-                                                center=dict(
-                                                    lat=38.72490, lon=-95.61446
-                                                ),
-                                                pitch=0,
-                                                zoom=3.5,
-                                            ),
-                                            autosize=True,
+                                html.Div(
+                                    id="slider-container",
+                                    children=[
+                                        html.H5(
+                                            id="slider-text",
+                                            children="Select state to visualize:",
                                         ),
-                                    ),
+                                        dcc.Dropdown(
+                                            style = {'width':'33%'},
+                                            id="state-select",
+                                            options=[{"label": i, "value": i} for i in states],
+                                        ),
+                                    ],
+                                ),
+                                html.Div(
+                                    id="heatmap-container",
+                                    style={'textAlign': 'center'},
+                                    children=[
+                                        html.H5(
+                                            "Heatmap of income by city"
+                                            ),        
+                                        dcc.Graph(
+                                            id="county-choropleth",
+                                            figure=dict(
+                                                data=[
+                                                    dict(
+                                                        lat=data_map["Lat"],
+                                                        lon=data_map["Lon"],    
+                                                        hovertext = [["State: {} <br>County: {} <br>City: {} <br>Mean income: {}".format(i,j,v,w)]
+                                                            for i,j,v,w in zip(data_map['State_Name'], data_map['County'], data_map['City'], data_map['Mean'])],
+                                                        hoverinfo="text",
+                                                        marker=dict(size= 6, color= data_map['Scale'], opacity=7),
+                                                        type="scattermapbox",
+                                                    )
+                                                ],
+                                                layout=dict(
+                                                    mapbox=dict(
+                                                        layers=[],
+                                                        accesstoken=mapbox_access_token,
+                                                        style=mapbox_style,
+                                                        center=dict(
+                                                            lat=38.72490, lon=-95.61446
+                                                        ),
+                                                        pitch=0,
+                                                        zoom=3.5,
+                                                    ),
+                                                    autosize=True,
+                                                ),
+                                            ),
+                                        ),
+                                    ],
                                 ),
                             ],
                         ),
-                    ],
-                ),
-# =============================================================================
-                 html.Div(
-                     id="graph-container",
-                     children=[
-                         html.H5(id="chart-selector", style={'textAlign': 'center'}, children="Select chart:"),
-                         dcc.Dropdown(
-                             options=[
-                                 {
-                                     "label": "Income mean by city in the selected State (Aggregated by ZIP Codes)",
-                                     "value": "barplot",
-                                 },
-                                 {
-                                     "label": "Income std deviation by city in the selected State (Aggregated by ZIP Codes)",
-                                     "value": "barplot_std",
-                                 },
-                                {
-                                     "label": "Income median by city in the selected State (Aggregated by ZIP Codes)",
-                                     "value": "barplot_med",
-                                 }
-                             ],
-                             value="barplot",
-                             id="chart-dropdown",
-                         ),
-                         dcc.Graph(
-                             id="selected-data",
-                             figure=dict(
-                                 data=[dict(x=0, y=0)],
-                                 layout=dict(
-                                     paper_bgcolor="#F4F4F8",
-                                     plot_bgcolor="#F4F4F8",
-                                     autofill=True,
-                                     margin=dict(t=75, r=50, b=100, l=50),
+        # =============================================================================
+                         html.Div(
+                             id="graph-container",
+                             children=[
+                                 html.H5(id="chart-selector", children="Select chart to visualize:"),
+                                 dcc.Dropdown(
+                                     style = {'width':'60%'},
+                                     options=[
+                                         {
+                                             "label": "Income mean by city in the selected State (Aggregated by ZIP Codes)",
+                                             "value": "barplot",
+                                         },
+                                         {
+                                             "label": "Income std deviation by city in the selected State (Aggregated by ZIP Codes)",
+                                             "value": "barplot_std",
+                                         },
+                                        {
+                                             "label": "Income median by city in the selected State (Aggregated by ZIP Codes)",
+                                             "value": "barplot_med",
+                                         }
+                                     ],
+                                     value="barplot",
+                                     id="chart-dropdown",
                                  ),
-                             ),
+                                 dcc.Graph(
+                                     id="selected-data",
+                                     figure=dict(
+                                         data=[dict(x=0, y=0)],
+                                         layout=dict(
+                                             paper_bgcolor="#F4F4F8",
+                                             plot_bgcolor="#F4F4F8",
+                                             autofill=True,
+                                             margin=dict(t=75, r=50, b=100, l=50),
+                                         ),
+                                     ),
+                                 ),
+                             ],
                          ),
-                     ],
-                 ),
-# =============================================================================
-            ],
-        ),
+        # =============================================================================
+                    ],
+                ),       
+                ]),
+                dcc.Tab(label = 'Raw data', children = [
+                        #Here its supossed to be the raw table to explore the data
+                ])
+        ])
+
     ],
 )
                                         
@@ -299,7 +309,6 @@ def display_selected_data(chart_dropdown, state):
     dff = data_map[data_map["State_Name"] == state]
     dff = dff.sort_values("Mean")
 
-    title = "Bar plot of mean income per county in selected state"
     
     if chart_dropdown == 'barplot':
     
