@@ -22,6 +22,8 @@ states = data_map['State_Name'].unique()
 counties = data_map['County'].unique()
 incomes = data_map['Mean'].unique()
 
+data_map = data_map.drop(columns = 'id')
+
 
 bins = [
     0,
@@ -206,7 +208,23 @@ app.layout = html.Div(
                 ),       
                 ]),
                 dcc.Tab(label = 'Raw data', children = [
-                        #Here its supossed to be the raw table to explore the data
+                        dash_table.DataTable(
+                            id='table',
+                            columns=[{"name": i, "id": i} for i in data_map.columns],
+                            data=data_map.to_dict('records'),
+                            style_header={'backgroundColor': 'rgb(30, 30, 30)'},
+                            style_cell={
+                                'backgroundColor': 'rgb(50, 50, 50)',
+                                'color': 'white'
+                            },
+                            editable=True,
+                            filter_action="native",
+                            sort_action="native",
+                            sort_mode="multi",
+                            page_current= 0,
+                            page_size= 30,
+                        ),
+                        html.Div(id='datatable-interactivity-container')
                 ])
         ])
 
