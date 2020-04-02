@@ -117,7 +117,7 @@ app.layout = html.Div(
                                             children="Select state to visualize:",
                                         ),
                                         dcc.Dropdown(
-                                            style = {'width':'33%'},
+                                            style = {'width':'33%', 'padding': 2 },
                                             id="state-select",
                                             options=[{"label": i, "value": i} for i in states],
                                         ),
@@ -167,9 +167,9 @@ app.layout = html.Div(
                          html.Div(
                              id="graph-container",
                              children=[
-                                 html.H5(id="chart-selector", children="Select chart to visualize:"),
+                                 html.H5(id="chart-selector", style = {'padding' : 2},  children="Select chart to visualize:"),
                                  dcc.Dropdown(
-                                     style = {'width':'60%'},
+                                     style = {'width':'60%', 'padding': 2},
                                      options=[
                                          {
                                              "label": "Income mean by city in the selected State (Aggregated by ZIP Codes)",
