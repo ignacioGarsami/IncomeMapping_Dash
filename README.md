@@ -2,6 +2,10 @@
 
 The idea of this project is to test the capabilities of Dash by creating an application with a real-word data set of our choosing.
 
+# Author
+
+Author is the owner of this repository, Ignacio García Sánchez-Migallón for the Data tidying and reporting course, from the Statistics for Data Science Master's at Carlos III University. Year 2019/2020.
+
 # Dependencies
 
 The app make use of the packages specified in requirements.txt
